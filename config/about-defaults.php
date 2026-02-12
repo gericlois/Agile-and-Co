@@ -1,0 +1,45 @@
+<?php
+return [
+    'about_hero' => [
+        'pre_headline' => 'About Us',
+        'headline' => 'We Help Service Businesses <span class="text-accent">Grow.</span>',
+        'subtitle' => 'We\'re a team of marketers, strategists, and technologists who believe service businesses deserve better marketing. So we built it.',
+    ],
+    'about_story' => [
+        'pre_headline' => 'Our Story',
+        'headline' => 'Built by People Who <span class="text-accent">Get It.</span>',
+        'paragraph1' => 'We\'ve seen what happens when service businesses work with the wrong marketing agency. Generic strategies. Cookie-cutter content. Monthly reports full of vanity metrics that don\'t mean anything.',
+        'highlight' => 'We built Agile & Co to be different.',
+        'paragraph2' => 'We specialize in one thing: helping service businesses grow. We built Core, our proprietary AI engine, to make marketing faster, smarter, and more effective. And we structured our entire company around actually delivering results — not just promising them.',
+        'focus_title' => 'Our Focus',
+        'focus_text' => 'HVAC, Plumbing, Electrical, Remodeling, Moving, Landscaping, and more. We know the seasonality, the services, and the customer mindset. We\'re not learning your industry on your dime.',
+    ],
+    'about_values' => [
+        'pre_headline' => 'Our Values',
+        'headline' => 'What We <span class="text-accent">Believe.</span>',
+        'card1_title' => 'Results Over Reports',
+        'card1_text' => 'We measure success by booked jobs, not vanity metrics. If it doesn\'t drive revenue, we don\'t waste time on it.',
+        'card2_title' => 'Transparency Always',
+        'card2_text' => 'No long-term contracts. No hidden fees. No jargon-filled reports designed to confuse. You\'ll always know what\'s working.',
+        'card3_title' => 'Specialization Wins',
+        'card3_text' => 'We don\'t try to be everything to everyone. We focus on service businesses because that\'s where we deliver the best results.',
+    ],
+    'about_different' => [
+        'pre_headline' => 'Why We\'re Different',
+        'headline' => 'The Agile & Co <span class="text-accent">Difference.</span>',
+        'item1_title' => 'Powered by Core',
+        'item1_text' => 'Our proprietary AI engine learns your business, remembers everything, and helps us deliver marketing that actually sounds like you.',
+        'item2_title' => 'Industry Specialists',
+        'item2_text' => 'We work exclusively with service businesses. We know the seasonality, the services, and what actually drives booked jobs.',
+        'item3_title' => 'No Long-Term Contracts',
+        'item3_text' => 'We earn your business every month. If we don\'t deliver, you can leave. It\'s that simple.',
+        'item4_title' => 'Full Attribution',
+        'item4_text' => 'We track every lead to its source. You\'ll always know exactly what\'s driving results — and what\'s not.',
+    ],
+    'about_cta' => [
+        'headline' => 'Ready to Work Together?',
+        'subtitle' => 'Let\'s have a conversation about your business and see if we\'re the right fit.',
+        'cta_primary' => 'Get in Touch',
+        'cta_secondary' => 'Learn About Core',
+    ],
+];

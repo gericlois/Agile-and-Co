@@ -1,0 +1,17 @@
+# Sensitive config (contains API keys)
+config/chatbot.php
+
+# Uploads (user content)
+uploads/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Node
+node_modules/
+package-lock.json

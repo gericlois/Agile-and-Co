@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"c:\\\\xampp2\\\\mysql\\\\bin\\\\mysql.exe\" -u root -e \"USE agileandco; SHOW TABLES; SELECT * FROM admins;\")",
+      "Bash(/c/xampp2/php/php.exe:*)",
+      "Bash(\"c:/xampp2/php/php.exe\":*)",
+      "Bash(ls:*)",
+      "Bash(\"c:/xampp2/htdocs/AgileandCo/temp_check.ps1\" << 'EOF'\n$bytes = [System.IO.File]::ReadAllBytes\\(\"C:\\\\xampp2\\\\htdocs\\\\AgileandCo\\\\index.php\"\\)\n$crCount = \\($bytes | Where-Object { $_ -eq 13 }\\).Count\nWrite-Host \"CR \\(carriage return\\) bytes found: $crCount\"\nif \\($crCount -eq 0\\) { Write-Host \"LF-only line endings confirmed.\" } else { Write-Host \"WARNING: CRLF endings detected.\" }\nEOF)",
+      "Bash(git reset:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
