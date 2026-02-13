@@ -504,12 +504,18 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); font-weight: 700; lin
    ============================================ */
 .industries-section { background: var(--gray-900); }
 .industries-section h2 { font-size: clamp(32px, 4vw, 48px); margin-bottom: 60px; text-align: center; }
-.industry-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-.industry-card { background: linear-gradient(135deg, var(--gray-800), var(--gray-900)); border: 1px solid var(--gray-700); border-radius: 20px; padding: 32px; text-decoration: none; color: var(--white); transition: all 0.4s ease; display: block; }
+.industry-cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.industry-card { background: linear-gradient(135deg, var(--gray-800), var(--gray-900)); border: 1px solid var(--gray-700); border-radius: 20px; padding: 32px; text-decoration: none; color: var(--white); transition: all 0.4s ease; display: block; overflow: hidden; }
+.industry-card.has-image { padding: 0; }
 .industry-card:hover { border-color: var(--accent); transform: translateY(-4px); }
 .industry-card h3 { font-size: 20px; margin-bottom: 12px; }
 .industry-card p { color: var(--gray-400); font-size: 15px; line-height: 1.7; margin-bottom: 16px; }
 .industry-card-link { color: var(--accent); font-weight: 600; font-size: 14px; }
+.industry-card-img { width: 100%; height: 300px; overflow: hidden; }
+.industry-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+.industry-card:hover .industry-card-img img { transform: scale(1.05); }
+.industry-card-placeholder { width: 100%; height: 100%; background: linear-gradient(135deg, var(--accent), #3BA8CC); display: flex; align-items: center; justify-content: center; font-size: 48px; font-weight: 700; color: var(--white); font-family: 'Space Grotesk', sans-serif; }
+.industry-card-body { padding: 28px 32px 32px; }
 
 /* ============================================
    INDUSTRY DETAIL PAGES (HVAC, Plumbing, etc.)

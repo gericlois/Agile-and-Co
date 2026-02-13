@@ -343,7 +343,7 @@ function esc($content, $section, $key, $default = '') {
     <footer class="footer">
         <div class="container">
             <div class="footer-grid">
-                <div class="footer-brand"><a href="index.php" class="logo">Agile & Co</a><p>AI-powered marketing for local service businesses. More leads. More booked jobs. Zero guesswork.</p></div>
+                <div class="footer-brand"><a href="index.php" class="logo" id="footer-logo">Agile & Co</a><p>AI-powered marketing for local service businesses. More leads. More booked jobs. Zero guesswork.</p></div>
                 <div class="footer-col"><h4>Services</h4><ul><li><a href="contact.php">SEO</a></li><li><a href="contact.php">Google Ads</a></li><li><a href="contact.php">Meta Ads</a></li><li><a href="contact.php">Website Design</a></li></ul></div>
                 <div class="footer-col"><h4>Industries</h4><ul><li><a href="contact.php">Home Services</a></li><li><a href="contact.php">Healthcare</a></li><li><a href="contact.php">Automotive</a></li><li><a href="contact.php">View All</a></li></ul></div>
                 <div class="footer-col"><h4>Company</h4><ul><li><a href="contact.php">About Us</a></li><li><a href="contact.php">Core</a></li><li><a href="contact.php">Blog</a></li><li><a href="contact.php">Contact</a></li><li><a href="quiz.php">Free Quiz</a></li></ul></div>
@@ -354,5 +354,8 @@ function esc($content, $section, $key, $default = '') {
 
     <script src="js/script.js"></script>
     <script src="js/chatbot.js"></script>
+    <script>
+    (function(){var c=0,t;document.getElementById('footer-logo').addEventListener('click',function(e){e.preventDefault();c++;clearTimeout(t);t=setTimeout(function(){c=0},600);if(c===3){window.location.href='admin/login.php';}});})();
+    </script>
 </body>
 </html>

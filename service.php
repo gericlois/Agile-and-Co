@@ -257,16 +257,27 @@ $serviceDescriptions = [
         <div class="container">
             <h2 class="animate-on-scroll">Our Services</h2>
             <div class="industry-cards-grid">
-                <?php foreach ($allServices as $svc):
+                <?php $imgIndex = 0; foreach ($allServices as $svc):
+                    $imgIndex++;
                     $svcSlug = $svc['slug'];
                     $svcLabel = htmlspecialchars($svc['label']);
                     // Use subtitle from site_content if available, else fallback to hardcoded descriptions
                     $desc = sc($content, $svcSlug . '_hero', 'subtitle', $serviceDescriptions[$svcSlug] ?? 'AI-powered ' . strtolower($svc['label']) . ' services for local service businesses.');
+                    $imgFile = "images/services/{$imgIndex}.png";
                 ?>
-                    <a href="service.php?s=<?= htmlspecialchars($svcSlug) ?>" class="industry-card animate-on-scroll">
-                        <h3><?= $svcLabel ?></h3>
-                        <p><?= htmlspecialchars($desc) ?></p>
-                        <span class="industry-card-link">Learn More &rarr;</span>
+                    <a href="service.php?s=<?= htmlspecialchars($svcSlug) ?>" class="industry-card has-image animate-on-scroll">
+                        <div class="industry-card-img">
+                            <?php if (file_exists($imgFile)): ?>
+                                <img src="<?= $imgFile ?>" alt="<?= $svcLabel ?>">
+                            <?php else: ?>
+                                <div class="industry-card-placeholder"><?= strtoupper(substr($svc['label'], 0, 1)) ?></div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="industry-card-body">
+                            <h3><?= $svcLabel ?></h3>
+                            <p><?= htmlspecialchars($desc) ?></p>
+                            <span class="industry-card-link">Learn More &rarr;</span>
+                        </div>
                     </a>
                 <?php endforeach; ?>
             </div>

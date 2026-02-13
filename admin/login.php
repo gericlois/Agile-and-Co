@@ -46,6 +46,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .login-box h1 { font-size: 28px; margin-bottom: 8px; text-align: center; }
         .login-box .subtitle { color: var(--gray-400); text-align: center; margin-bottom: 32px; }
         .login-error { background: rgba(255, 107, 107, 0.1); border: 1px solid rgba(255, 107, 107, 0.3); border-radius: 8px; padding: 12px 16px; margin-bottom: 24px; color: #ff6b6b; font-size: 14px; text-align: center; }
+        .password-wrapper { position: relative; }
+        .password-wrapper input { width: 100%; padding-right: 60px; }
+        .toggle-password { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--gray-400); cursor: pointer; font-size: 13px; font-family: inherit; }
+        .toggle-password:hover { color: var(--white); }
     </style>
 </head>
 <body>
@@ -63,7 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" name="password" required>
+                    <div class="password-wrapper">
+                        <input type="password" name="password" id="password" required>
+                        <button type="button" class="toggle-password" onclick="var p=document.getElementById('password');var s=this.querySelector('span');if(p.type==='password'){p.type='text';s.textContent='Hide';}else{p.type='password';s.textContent='Show';}"><span>Show</span></button>
+                    </div>
                 </div>
                 <button type="submit" class="btn btn-primary form-submit">Log In →</button>
             </form>

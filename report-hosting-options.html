@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hosting Options Report | Agile & Co</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a2e; line-height: 1.7; padding: 60px; max-width: 900px; margin: 0 auto; background: #fff; }
+
+        .cover { text-align: center; padding: 80px 0 60px; border-bottom: 3px solid #0ea5e9; margin-bottom: 50px; }
+        .cover h1 { font-size: 32px; font-weight: 700; color: #0ea5e9; margin-bottom: 8px; }
+        .cover h2 { font-size: 20px; font-weight: 400; color: #64748b; margin-bottom: 24px; }
+        .cover .meta { font-size: 14px; color: #94a3b8; }
+        .cover .logo { font-size: 14px; font-weight: 600; color: #0ea5e9; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
+
+        h2 { font-size: 22px; color: #0f172a; margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; }
+        h3 { font-size: 17px; color: #0ea5e9; margin: 24px 0 10px; }
+        p { margin-bottom: 14px; font-size: 15px; color: #334155; }
+
+        .summary-box { background: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 20px 24px; border-radius: 0 8px 8px 0; margin: 24px 0; }
+        .summary-box p { margin: 0; font-size: 15px; color: #0c4a6e; }
+
+        .warning-box { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px 24px; border-radius: 0 8px 8px 0; margin: 24px 0; }
+        .warning-box p { margin: 0; font-size: 15px; color: #78350f; }
+
+        .recommendation-box { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 20px 24px; border-radius: 0 8px 8px 0; margin: 24px 0; }
+        .recommendation-box p { margin: 0; font-size: 15px; color: #14532d; }
+
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+        th { background: #0f172a; color: #fff; padding: 12px 16px; text-align: left; font-weight: 600; }
+        td { padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #334155; }
+        tr:nth-child(even) { background: #f8fafc; }
+
+        .tag { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .tag-green { background: #dcfce7; color: #166534; }
+        .tag-yellow { background: #fef9c3; color: #854d0e; }
+        .tag-red { background: #fee2e2; color: #991b1b; }
+        .tag-blue { background: #dbeafe; color: #1e40af; }
+
+        ul { margin: 10px 0 16px 24px; font-size: 15px; color: #334155; }
+        li { margin-bottom: 6px; }
+
+        .pros-cons { display: flex; gap: 24px; margin: 16px 0; }
+        .pros, .cons { flex: 1; padding: 16px; border-radius: 8px; }
+        .pros { background: #f0fdf4; }
+        .cons { background: #fef2f2; }
+        .pros h4 { color: #166534; margin-bottom: 8px; font-size: 14px; }
+        .cons h4 { color: #991b1b; margin-bottom: 8px; font-size: 14px; }
+        .pros li, .cons li { font-size: 13px; }
+
+        .footer-report { margin-top: 60px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center; font-size: 13px; color: #94a3b8; }
+
+        @media print {
+            body { padding: 40px; }
+            .cover { page-break-after: avoid; }
+            h2 { page-break-after: avoid; }
+            table { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cover">
+        <div class="logo">Agile & Co</div>
+        <h1>Website Hosting Options Report</h1>
+        <h2>WP Engine Compatibility & Alternative Solutions</h2>
+        <p class="meta">Prepared: February 13, 2026 &nbsp;|&nbsp; Version 1.0</p>
+    </div>
+
+    <h2>1. Executive Summary</h2>
+    <div class="summary-box">
+        <p><strong>The Agile & Co website is a custom PHP application</strong> with a MySQL database, custom admin panel, AI-powered features, and dynamic CMS. WP Engine is a WordPress-managed hosting platform and does not natively support non-WordPress PHP applications. This report outlines three paths forward with cost, effort, and risk analysis.</p>
+    </div>
+
+    <h2>2. Current Technical Stack</h2>
+    <table>
+        <tr><th>Component</th><th>Technology</th><th>Details</th></tr>
+        <tr><td>Backend</td><td>Custom PHP 8.2</td><td>No framework, pure PHP with PDO</td></tr>
+        <tr><td>Database</td><td>MySQL (MariaDB)</td><td>10 tables, PDO connections</td></tr>
+        <tr><td>Admin Panel</td><td>Custom-built</td><td>Dashboard, CMS, contacts, blog, activity log</td></tr>
+        <tr><td>AI Features</td><td>Google Gemini API</td><td>Chatbot, lead scoring, quiz recommendations</td></tr>
+        <tr><td>Frontend</td><td>HTML/CSS/JS</td><td>No build tools, vanilla JavaScript</td></tr>
+        <tr><td>Dev Server</td><td>XAMPP (Apache)</td><td>localhost with browser-sync</td></tr>
+    </table>
+
+    <h2>3. Hosting Options Analysis</h2>
+
+    <h3>Option A: Convert to WordPress Theme</h3>
+    <p>Rebuild the entire site as a custom WordPress theme with plugins to replicate current functionality. This is the <strong>only viable path for WP Engine hosting</strong>.</p>
+
+    <table>
+        <tr><th>Current Feature</th><th>WordPress Equivalent</th><th>Effort</th></tr>
+        <tr><td>Custom pages (index, services, contact)</td><td>Page templates in theme</td><td><span class="tag tag-yellow">Medium</span></td></tr>
+        <tr><td>Blog (posts table)</td><td>Native WordPress posts</td><td><span class="tag tag-green">Low</span></td></tr>
+        <tr><td>Admin panel (dashboard, CMS)</td><td>WordPress admin + ACF plugin</td><td><span class="tag tag-green">Low</span></td></tr>
+        <tr><td>Contact form + notifications</td><td>Gravity Forms or custom plugin</td><td><span class="tag tag-yellow">Medium</span></td></tr>
+        <tr><td>site_content (dynamic CMS)</td><td>ACF (Advanced Custom Fields)</td><td><span class="tag tag-yellow">Medium</span></td></tr>
+        <tr><td>Services / Industries tables</td><td>Custom Post Types</td><td><span class="tag tag-yellow">Medium</span></td></tr>
+        <tr><td>AI Chatbot (Gemini)</td><td>Custom WordPress plugin</td><td><span class="tag tag-red">High</span></td></tr>
+        <tr><td>AI Lead Scoring</td><td>Custom WordPress plugin</td><td><span class="tag tag-red">High</span></td></tr>
+        <tr><td>Activity log</td><td>WP Activity Log plugin</td><td><span class="tag tag-green">Low</span></td></tr>
+    </table>
+
+    <div class="pros-cons">
+        <div class="pros">
+            <h4>PROS</h4>
+            <ul>
+                <li>Fully compatible with WP Engine</li>
+                <li>Access to WordPress plugin ecosystem</li>
+                <li>Easier for non-developers to manage</li>
+                <li>Built-in SEO tools (Yoast, RankMath)</li>
+                <li>Automatic updates & security patches</li>
+            </ul>
+        </div>
+        <div class="cons">
+            <h4>CONS</h4>
+            <ul>
+                <li>Significant rebuild effort required</li>
+                <li>AI features need custom plugin development</li>
+                <li>WordPress overhead (slower than custom PHP)</li>
+                <li>Plugin dependency and compatibility risks</li>
+                <li>Loss of full code control</li>
+            </ul>
+        </div>
+    </div>
+
+    <p><strong>Estimated effort:</strong> 3-5 weeks &nbsp;|&nbsp; <strong>Risk:</strong> <span class="tag tag-yellow">Medium</span></p>
+
+    <h3>Option B: Deploy Custom PHP to Alternative Host</h3>
+    <p>Keep the current codebase as-is and deploy to a host that supports custom PHP + MySQL applications.</p>
+
+    <table>
+        <tr><th>Host</th><th>Type</th><th>Price/mo</th><th>PHP + MySQL</th><th>Ease of Deploy</th></tr>
+        <tr><td><strong>Cloudways</strong></td><td>Managed Cloud</td><td>$14+</td><td><span class="tag tag-green">Full Support</span></td><td><span class="tag tag-green">Easy</span></td></tr>
+        <tr><td><strong>DigitalOcean</strong></td><td>VPS (Droplet)</td><td>$6+</td><td><span class="tag tag-green">Full Support</span></td><td><span class="tag tag-yellow">Medium</span></td></tr>
+        <tr><td><strong>Hostinger</strong></td><td>Shared Hosting</td><td>$3+</td><td><span class="tag tag-green">Full Support</span></td><td><span class="tag tag-green">Easy</span></td></tr>
+        <tr><td><strong>A2 Hosting</strong></td><td>Shared / VPS</td><td>$3+</td><td><span class="tag tag-green">Full Support</span></td><td><span class="tag tag-green">Easy</span></td></tr>
+        <tr><td><strong>Railway</strong></td><td>PaaS</td><td>$5+</td><td><span class="tag tag-green">Full Support</span></td><td><span class="tag tag-green">Git Deploy</span></td></tr>
+    </table>
+
+    <div class="pros-cons">
+        <div class="pros">
+            <h4>PROS</h4>
+            <ul>
+                <li>Zero code changes required</li>
+                <li>Deploy in hours, not weeks</li>
+                <li>Full control over server and code</li>
+                <li>All AI features work out of the box</li>
+                <li>Lower cost than WP Engine</li>
+            </ul>
+        </div>
+        <div class="cons">
+            <h4>CONS</h4>
+            <ul>
+                <li>Not on WP Engine (if that's a requirement)</li>
+                <li>Server management needed (VPS options)</li>
+                <li>No WordPress plugin ecosystem</li>
+                <li>Manual security updates</li>
+            </ul>
+        </div>
+    </div>
+
+    <p><strong>Estimated effort:</strong> 1-2 days &nbsp;|&nbsp; <strong>Risk:</strong> <span class="tag tag-green">Low</span></p>
+
+    <h3>Option C: Hybrid — Static Frontend + Headless CMS on WP Engine</h3>
+    <p>Use WordPress on WP Engine as a headless CMS (content management only) while the frontend remains custom-built and hosted separately.</p>
+
+    <div class="pros-cons">
+        <div class="pros">
+            <h4>PROS</h4>
+            <ul>
+                <li>Content managed via WordPress admin</li>
+                <li>Frontend stays fast and custom</li>
+                <li>WP Engine handles CMS hosting</li>
+            </ul>
+        </div>
+        <div class="cons">
+            <h4>CONS</h4>
+            <ul>
+                <li>Most complex architecture</li>
+                <li>Two hosting environments to manage</li>
+                <li>Requires API integration (REST/GraphQL)</li>
+                <li>Highest development effort</li>
+            </ul>
+        </div>
+    </div>
+
+    <p><strong>Estimated effort:</strong> 4-6 weeks &nbsp;|&nbsp; <strong>Risk:</strong> <span class="tag tag-red">High</span></p>
+
+    <h2>4. Cost Comparison</h2>
+    <table>
+        <tr><th>Option</th><th>Hosting Cost/mo</th><th>Migration Effort</th><th>Ongoing Maintenance</th></tr>
+        <tr><td>A — WordPress on WP Engine</td><td>$20 - $60</td><td>3-5 weeks</td><td>Low (managed)</td></tr>
+        <tr><td>B — Custom PHP on Cloudways</td><td>$14 - $28</td><td>1-2 days</td><td>Medium</td></tr>
+        <tr><td>B — Custom PHP on Hostinger</td><td>$3 - $12</td><td>1-2 days</td><td>Low</td></tr>
+        <tr><td>C — Hybrid (WP Engine + separate host)</td><td>$30 - $80</td><td>4-6 weeks</td><td>High (two systems)</td></tr>
+    </table>
+
+    <h2>5. Recommendation</h2>
+    <div class="recommendation-box">
+        <p><strong>Recommended: Option B — Deploy to Cloudways or Hostinger.</strong></p>
+        <p>This preserves the entire codebase, all AI features, and the custom admin panel with minimal effort (1-2 days). It's the fastest, cheapest, and lowest-risk path to go live. If WP Engine is a hard business requirement, Option A (WordPress conversion) is the only viable path but requires significant rebuild effort.</p>
+    </div>
+
+    <h2>6. Deployment Steps (Option B)</h2>
+    <ol style="margin: 16px 0 16px 24px; font-size: 15px; color: #334155;">
+        <li>Choose hosting provider and provision a PHP 8.2 + MySQL server</li>
+        <li>Upload codebase via SFTP or Git</li>
+        <li>Create MySQL database and import <code>setup.sql</code></li>
+        <li>Run all PHP setup scripts in <code>config/</code> folder</li>
+        <li>Update <code>config/database.php</code> with production credentials</li>
+        <li>Add Gemini API key to <code>config/chatbot.php</code></li>
+        <li>Configure domain DNS and SSL certificate</li>
+        <li>Test all pages, forms, admin panel, and AI features</li>
+    </ol>
+
+    <div class="warning-box">
+        <p><strong>Before going live:</strong> Change the default admin password (currently admin / admin123), update the notification email in the database, and secure the <code>config/</code> directory from public access.</p>
+    </div>
+
+    <div class="footer-report">
+        <p>Agile & Co — Hosting Options Report &nbsp;|&nbsp; February 2026 &nbsp;|&nbsp; Confidential</p>
+    </div>
+
+</body>
+</html>

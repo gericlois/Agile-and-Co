@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "watch": "browser-sync start --proxy \"localhost/AgileandCo\" --files \"**/*.php\" \"css/**/*.css\" \"js/**/*.js\" \"admin/**/*.php\" \"admin/**/*.css\""
+    "watch": "browser-sync start --proxy \"localhost/Agile-and-Co\" --files \"**/*.php\" \"css/**/*.css\" \"js/**/*.js\" \"admin/**/*.php\" \"admin/**/*.css\""
   },
   "keywords": [],
   "author": "",
