@@ -1,7 +1,8 @@
 <?php
-session_start();
+session_start(['cookie_httponly' => true, 'cookie_samesite' => 'Strict']);
 require_once '../config/database.php';
 require_once '../config/activity-log.php';
+require_once '../config/csrf.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header('Location: login.php');
@@ -14,21 +15,25 @@ $error = '';
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try {
-        $stmt = $pdo->prepare(
-            "INSERT INTO site_content (section, field_key, field_value)
-             VALUES (?, ?, ?)
-             ON DUPLICATE KEY UPDATE field_value = VALUES(field_value)"
-        );
-        foreach ($_POST['content'] as $section => $fields) {
-            foreach ($fields as $key => $value) {
-                $stmt->execute([$section, $key, trim($value)]);
+    if (!csrf_verify()) {
+        $error = 'Invalid security token. Please try again.';
+    } else {
+        try {
+            $stmt = $pdo->prepare(
+                "INSERT INTO site_content (section, field_key, field_value)
+                 VALUES (?, ?, ?)
+                 ON DUPLICATE KEY UPDATE field_value = VALUES(field_value)"
+            );
+            foreach ($_POST['content'] as $section => $fields) {
+                foreach ($fields as $key => $value) {
+                    $stmt->execute([$section, $key, trim($value)]);
+                }
             }
+            logActivity($pdo, 'update', 'content', 'Updated about page content');
+            $success = 'About page content saved successfully.';
+        } catch (PDOException $e) {
+            $error = 'Error saving content. Please try again.';
         }
-        logActivity($pdo, 'update', 'content', 'Updated about page content');
-        $success = 'About page content saved successfully.';
-    } catch (PDOException $e) {
-        $error = 'Error saving content. Please try again.';
     }
 }
 
@@ -199,6 +204,7 @@ $sections = [
             <?php endif; ?>
 
             <form method="POST">
+                <?= csrf_field() ?>
                 <?php foreach ($sections as $sectionKey => $sectionData): ?>
                     <div class="admin-accordion-item">
                         <div class="admin-accordion-header" onclick="this.parentElement.classList.toggle('open')">

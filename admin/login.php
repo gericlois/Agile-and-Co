@@ -1,7 +1,11 @@
 <?php
-session_start();
+session_start([
+    'cookie_httponly' => true,
+    'cookie_samesite' => 'Strict',
+]);
 require_once '../config/database.php';
 require_once '../config/activity-log.php';
+require_once '../config/csrf.php';
 
 if (isset($_SESSION['admin_id'])) {
     header('Location: dashboard.php');
@@ -10,22 +14,44 @@ if (isset($_SESSION['admin_id'])) {
 
 $error = '';
 
+// Brute force protection: max 5 attempts per 15 minutes
+if (!isset($_SESSION['login_attempts'])) { $_SESSION['login_attempts'] = 0; }
+if (!isset($_SESSION['login_lockout'])) { $_SESSION['login_lockout'] = 0; }
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $password = $_POST['password'] ?? '';
-
-    $stmt = $pdo->prepare("SELECT * FROM admins WHERE username = ?");
-    $stmt->execute([$username]);
-    $admin = $stmt->fetch();
-
-    if ($admin && password_verify($password, $admin['password'])) {
-        $_SESSION['admin_id'] = $admin['id'];
-        $_SESSION['admin_username'] = $admin['username'];
-        logActivity($pdo, 'login', 'session', 'Admin logged in');
-        header('Location: dashboard.php');
-        exit;
+    if (!csrf_verify()) {
+        $error = 'Invalid security token. Please try again.';
+    // Check lockout
+    } elseif ($_SESSION['login_attempts'] >= 5 && time() < $_SESSION['login_lockout']) {
+        $remaining = ceil(($_SESSION['login_lockout'] - time()) / 60);
+        $error = 'Too many failed attempts. Please wait ' . $remaining . ' minute(s).';
     } else {
-        $error = 'Invalid username or password.';
+        if ($_SESSION['login_attempts'] >= 5) {
+            $_SESSION['login_attempts'] = 0; // Reset after lockout expires
+        }
+
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
+
+        $stmt = $pdo->prepare("SELECT * FROM admins WHERE username = ?");
+        $stmt->execute([$username]);
+        $admin = $stmt->fetch();
+
+        if ($admin && password_verify($password, $admin['password'])) {
+            $_SESSION['login_attempts'] = 0;
+            session_regenerate_id(true);
+            $_SESSION['admin_id'] = $admin['id'];
+            $_SESSION['admin_username'] = $admin['username'];
+            logActivity($pdo, 'login', 'session', 'Admin logged in');
+            header('Location: dashboard.php');
+            exit;
+        } else {
+            $_SESSION['login_attempts']++;
+            if ($_SESSION['login_attempts'] >= 5) {
+                $_SESSION['login_lockout'] = time() + 900; // 15 min lockout
+            }
+            $error = 'Invalid username or password.';
+        }
     }
 }
 ?>
@@ -61,6 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="login-error"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
             <form method="POST">
+                <?= csrf_field() ?>
                 <div class="form-group">
                     <label>Username</label>
                     <input type="text" name="username" required autofocus>

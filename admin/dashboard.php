@@ -1,7 +1,8 @@
 <?php
-session_start();
+session_start(['cookie_httponly' => true, 'cookie_samesite' => 'Strict']);
 require_once '../config/database.php';
 require_once '../config/activity-log.php';
+require_once '../config/csrf.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header('Location: login.php');

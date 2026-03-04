@@ -20,7 +20,6 @@ $formFields = $pdo->query("SELECT * FROM contact_form_fields WHERE is_active = 1
 // DB columns that exist in contacts table (not custom)
 $dbColumns = ['first_name', 'last_name', 'email', 'phone', 'company', 'industry', 'message'];
 
-$success = false;
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -87,8 +86,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $body .= "\nSubmitted: " . date('M j, Y g:i A');
 
-            $headers = "From: " . trim($name) . " via Agile & Co <" . $emailFrom . ">\r\n";
-            $headers .= "Reply-To: " . trim($name) . " <" . $emailFrom . ">\r\n";
+            // Sanitize values for mail headers (prevent header injection)
+            $safeName = str_replace(["\r", "\n", "\t"], '', trim($name));
+            $safeEmail = filter_var($emailFrom, FILTER_SANITIZE_EMAIL);
+            $headers = "From: " . $safeName . " via Agile & Co <" . $safeEmail . ">\r\n";
+            $headers .= "Reply-To: " . $safeName . " <" . $safeEmail . ">\r\n";
             $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 
             foreach ($notifyEmails as $to) {
@@ -96,9 +98,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        $success = true;
+        // POST-redirect-GET to prevent duplicate submissions on refresh
+        header('Location: contact.php?success=1');
+        exit;
     }
 }
+
+$success = isset($_GET['success']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -117,6 +123,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="container">
             <div class="header-inner">
                 <a href="index.php" class="logo">Agile & Co</a>
+                <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+                <div class="nav-overlay"></div>
                 <nav class="nav">
                     <ul class="nav-links">
                         <li><a href="service.php">Services</a></li>
@@ -243,7 +251,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="footer-col"><h4>Industries</h4><ul><li><a href="industry-hvac.php">HVAC</a></li><li><a href="industry-plumbing.php">Plumbing</a></li><li><a href="industry-electrical.php">Electrical</a></li><li><a href="industries.php">View All</a></li></ul></div>
                 <div class="footer-col"><h4>Company</h4><ul><li><a href="about.php">About Us</a></li><li><a href="core.php">Core</a></li><li><a href="blog.php">Blog</a></li><li><a href="contact.php">Contact</a></li><li><a href="quiz.php">Free Quiz</a></li></ul></div>
             </div>
-            <div class="footer-bottom"><p>&copy; 2025 Agile & Co. All rights reserved.</p><div class="footer-legal"><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div></div>
+            <div class="footer-bottom"><p>&copy; <?= date('Y') ?> Agile & Co. All rights reserved.</p><div class="footer-legal"><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div></div>
         </div>
     </footer>
 

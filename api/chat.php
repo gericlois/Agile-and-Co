@@ -115,7 +115,8 @@ curl_setopt_array($ch, [
     CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
     CURLOPT_POSTFIELDS => json_encode($payload),
     CURLOPT_TIMEOUT => 30,
-    CURLOPT_SSL_VERIFYPEER => false
+    CURLOPT_SSL_VERIFYPEER => true,
+    CURLOPT_CAINFO => 'C:/xampp/apache/bin/curl-ca-bundle.crt'
 ]);
 
 $response = curl_exec($ch);
@@ -130,8 +131,8 @@ if ($curlError) {
 
 if ($httpCode !== 200) {
     $errorData = json_decode($response, true);
-    $errorMsg = $errorData['error']['message'] ?? 'API error (HTTP ' . $httpCode . ')';
-    echo json_encode(['error' => $errorMsg]);
+    error_log('Gemini API error: ' . ($errorData['error']['message'] ?? 'HTTP ' . $httpCode));
+    echo json_encode(['error' => 'Sorry, the AI service is temporarily unavailable. Please try again.']);
     exit;
 }
 

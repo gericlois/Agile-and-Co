@@ -152,7 +152,8 @@ curl_setopt_array($ch, [
     CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
     CURLOPT_POSTFIELDS => json_encode($payload),
     CURLOPT_TIMEOUT => 30,
-    CURLOPT_SSL_VERIFYPEER => false
+    CURLOPT_SSL_VERIFYPEER => true,
+    CURLOPT_CAINFO => 'C:/xampp/apache/bin/curl-ca-bundle.crt'
 ]);
 
 $response = curl_exec($ch);
@@ -161,14 +162,15 @@ $curlError = curl_error($ch);
 curl_close($ch);
 
 if ($curlError) {
+    error_log('Gemini quiz API curl error: ' . $curlError);
     echo json_encode(['error' => 'Connection error. Please try again.']);
     exit;
 }
 
 if ($httpCode !== 200) {
     $errorData = json_decode($response, true);
-    $errorMsg = $errorData['error']['message'] ?? 'API error (HTTP ' . $httpCode . ')';
-    echo json_encode(['error' => $errorMsg]);
+    error_log('Gemini quiz API error: ' . ($errorData['error']['message'] ?? 'HTTP ' . $httpCode));
+    echo json_encode(['error' => 'Sorry, the recommendation service is temporarily unavailable. Please try again.']);
     exit;
 }
 

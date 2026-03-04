@@ -1,7 +1,8 @@
 <?php
-session_start();
+session_start(['cookie_httponly' => true, 'cookie_samesite' => 'Strict']);
 require_once '../config/database.php';
 require_once '../config/activity-log.php';
+require_once '../config/csrf.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header('Location: login.php');
@@ -19,8 +20,13 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS notification_emails (
 $error = '';
 $success = '';
 
+// CSRF verification for all POST handlers
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrf_verify()) {
+    $error = 'Invalid security token. Please try again.';
+}
+
 // Add email
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error && isset($_POST['action'])) {
     if ($_POST['action'] === 'add_email') {
         $email = trim($_POST['email'] ?? '');
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -43,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
 // Toggle active
 if (isset($_GET['toggle'])) {
+    if (!csrf_verify()) { header('Location: email-settings.php'); exit; }
     $toggleId = (int)$_GET['toggle'];
     $stmt = $pdo->prepare("SELECT email, is_active FROM notification_emails WHERE id = ?");
     $stmt->execute([$toggleId]);
@@ -59,6 +66,7 @@ if (isset($_GET['toggle'])) {
 
 // Delete email
 if (isset($_GET['delete'])) {
+    if (!csrf_verify()) { header('Location: email-settings.php'); exit; }
     $deleteId = (int)$_GET['delete'];
     $stmt = $pdo->prepare("SELECT email FROM notification_emails WHERE id = ?");
     $stmt->execute([$deleteId]);
@@ -165,7 +173,7 @@ $unreadCount = $pdo->query("SELECT COUNT(*) FROM contacts WHERE is_read = 0")->f
                 <div style="background: rgba(255, 107, 107, 0.1); border: 1px solid rgba(255, 107, 107, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 24px; color: #ff6b6b; font-size: 14px;"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
             <?php if ($success): ?>
-                <div style="background: rgba(76, 201, 240, 0.1); border: 1px solid rgba(76, 201, 240, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 24px; color: var(--accent); font-size: 14px;"><?= $success ?></div>
+                <div style="background: rgba(76, 201, 240, 0.1); border: 1px solid rgba(76, 201, 240, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 24px; color: var(--accent); font-size: 14px;"><?= htmlspecialchars($success) ?></div>
             <?php endif; ?>
 
             <div class="admin-stats" style="grid-template-columns: repeat(2, 1fr);">
@@ -204,8 +212,8 @@ $unreadCount = $pdo->query("SELECT COUNT(*) FROM contacts WHERE is_read = 0")->f
                                     </td>
                                     <td><?= date('M j, Y', strtotime($em['created_at'])) ?></td>
                                     <td class="admin-actions">
-                                        <a href="email-settings.php?toggle=<?= $em['id'] ?>" class="btn-small"><?= $em['is_active'] ? 'Disable' : 'Enable' ?></a>
-                                        <a href="email-settings.php?delete=<?= $em['id'] ?>" class="btn-small btn-danger" onclick="return confirm('Remove &quot;<?= htmlspecialchars($em['email']) ?>&quot; from notifications?')">Delete</a>
+                                        <a href="email-settings.php?toggle=<?= $em['id'] ?>&csrf_token=<?= csrf_token() ?>" class="btn-small"><?= $em['is_active'] ? 'Disable' : 'Enable' ?></a>
+                                        <a href="email-settings.php?delete=<?= $em['id'] ?>&csrf_token=<?= csrf_token() ?>" class="btn-small btn-danger" onclick="return confirm('Remove &quot;<?= htmlspecialchars($em['email']) ?>&quot; from notifications?')">Delete</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -220,6 +228,7 @@ $unreadCount = $pdo->query("SELECT COUNT(*) FROM contacts WHERE is_read = 0")->f
                     <h2>Add Email</h2>
                 </div>
                 <form method="POST" style="padding: 24px;">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="add_email">
                     <div style="display: flex; gap: 12px; align-items: flex-end;">
                         <div style="flex: 1;">

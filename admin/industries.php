@@ -1,7 +1,8 @@
 <?php
-session_start();
+session_start(['cookie_httponly' => true, 'cookie_samesite' => 'Strict']);
 require_once '../config/database.php';
 require_once '../config/activity-log.php';
+require_once '../config/csrf.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header('Location: login.php');
@@ -45,8 +46,13 @@ foreach ($industryRows as $ind) {
     }
 }
 
+// CSRF verification for all POST handlers
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrf_verify()) {
+    $error = 'Invalid security token. Please try again.';
+}
+
 // Handle add industry
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_industry') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error && ($_POST['action'] ?? '') === 'add_industry') {
     $newLabel = trim($_POST['industry_name'] ?? '');
     $newSlug = trim($_POST['industry_slug'] ?? '');
     $newSlug = preg_replace('/[^a-z0-9\-]/', '', strtolower(str_replace(' ', '-', $newSlug)));
@@ -75,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_i
             $insertStmt->execute([$newSlug . '_hero', 'cta_secondary', 'See How Core Works']);
 
             logActivity($pdo, 'create', 'industry', 'Added industry: ' . $newLabel);
-            $success = 'Industry "' . htmlspecialchars($newLabel) . '" added successfully.';
+            $success = 'Industry "' . $newLabel . '" added successfully.';
 
             // Reload industries
             $industryRows = $pdo->query("SELECT * FROM industries ORDER BY sort_order, id")->fetchAll();
@@ -100,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_i
 }
 
 // Handle delete industry
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_industry') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error && ($_POST['action'] ?? '') === 'delete_industry') {
     $deleteSlug = trim($_POST['slug'] ?? '');
     if (!empty($deleteSlug) && !in_array($deleteSlug, $customSlugs)) {
         try {
@@ -154,7 +160,7 @@ if (!in_array($currentPage, $validPages)) {
 $isCustom = in_array($currentPage, $customSlugs);
 
 // Handle content form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_content') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error && ($_POST['action'] ?? '') === 'save_content') {
     try {
         $stmt = $pdo->prepare(
             "INSERT INTO site_content (section, field_key, field_value)
@@ -565,6 +571,7 @@ if ($isCustom && isset($customPageSections[$currentPage])) {
             <div id="addIndustryForm" style="display: none; background: var(--gray-800); border: 1px solid var(--gray-700); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
                 <h3 style="margin-bottom: 16px; font-size: 18px;">Add New Industry</h3>
                 <form method="POST" action="industries.php">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="add_industry">
                     <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 16px; align-items: end;">
                         <div class="form-group" style="margin-bottom: 0;">
@@ -597,6 +604,7 @@ if ($isCustom && isset($customPageSections[$currentPage])) {
             <?php if (!$isCustom): ?>
             <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
                 <form method="POST" action="industries.php" onsubmit="return confirm('Are you sure you want to delete the &quot;<?= htmlspecialchars($pageLabels[$currentPage]) ?>&quot; industry? This will remove all its content and cannot be undone.')">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="delete_industry">
                     <input type="hidden" name="slug" value="<?= htmlspecialchars($currentPage) ?>">
                     <button type="submit" class="btn btn-secondary" style="padding: 8px 16px; font-size: 13px; color: #ff6b6b; border-color: rgba(255, 107, 107, 0.3);">Delete This Industry</button>
@@ -605,6 +613,7 @@ if ($isCustom && isset($customPageSections[$currentPage])) {
             <?php endif; ?>
 
             <form method="POST" action="industries.php?page=<?= $currentPage ?>">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="save_content">
                 <?php foreach ($sections as $sectionKey => $sectionData): ?>
                     <div class="admin-accordion-item">

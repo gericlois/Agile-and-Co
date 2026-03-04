@@ -1,7 +1,8 @@
 <?php
-session_start();
+session_start(['cookie_httponly' => true, 'cookie_samesite' => 'Strict']);
 require_once '../config/database.php';
 require_once '../config/activity-log.php';
+require_once '../config/csrf.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header('Location: login.php');
@@ -10,8 +11,11 @@ if (!isset($_SESSION['admin_id'])) {
 
 // Delete post
 if (isset($_GET['delete'])) {
+    if (!csrf_verify()) { header('Location: posts.php'); exit; }
     $id = (int)$_GET['delete'];
-    $title = $pdo->query("SELECT title FROM posts WHERE id = $id")->fetchColumn();
+    $stmt_title = $pdo->prepare("SELECT title FROM posts WHERE id = ?");
+    $stmt_title->execute([$id]);
+    $title = $stmt_title->fetchColumn();
     $stmt = $pdo->prepare("DELETE FROM posts WHERE id = ?");
     $stmt->execute([$id]);
     logActivity($pdo, 'delete', 'post', 'Deleted post: ' . ($title ?: '#'.$id));
@@ -21,8 +25,11 @@ if (isset($_GET['delete'])) {
 
 // Toggle publish
 if (isset($_GET['toggle'])) {
+    if (!csrf_verify()) { header('Location: posts.php'); exit; }
     $id = (int)$_GET['toggle'];
-    $post = $pdo->query("SELECT title, is_published FROM posts WHERE id = $id")->fetch();
+    $stmt_post = $pdo->prepare("SELECT title, is_published FROM posts WHERE id = ?");
+    $stmt_post->execute([$id]);
+    $post = $stmt_post->fetch();
     $stmt = $pdo->prepare("UPDATE posts SET is_published = NOT is_published WHERE id = ?");
     $stmt->execute([$id]);
     $newState = $post['is_published'] ? 'Unpublished' : 'Published';
@@ -139,8 +146,8 @@ $unreadCount = $pdo->query("SELECT COUNT(*) FROM contacts WHERE is_read = 0")->f
                                 <td><?= date('M j, Y', strtotime($post['created_at'])) ?></td>
                                 <td class="admin-actions">
                                     <a href="post-edit.php?id=<?= $post['id'] ?>" class="btn-small">Edit</a>
-                                    <a href="posts.php?toggle=<?= $post['id'] ?>" class="btn-small"><?= $post['is_published'] ? 'Unpublish' : 'Publish' ?></a>
-                                    <a href="posts.php?delete=<?= $post['id'] ?>" class="btn-small btn-danger" onclick="return confirm('Delete this post?')">Delete</a>
+                                    <a href="posts.php?toggle=<?= $post['id'] ?>&csrf_token=<?= csrf_token() ?>" class="btn-small"><?= $post['is_published'] ? 'Unpublish' : 'Publish' ?></a>
+                                    <a href="posts.php?delete=<?= $post['id'] ?>&csrf_token=<?= csrf_token() ?>" class="btn-small btn-danger" onclick="return confirm('Delete this post?')">Delete</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

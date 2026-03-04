@@ -33,6 +33,8 @@ if (!$post) {
         <div class="container">
             <div class="header-inner">
                 <a href="index.php" class="logo">Agile & Co</a>
+                <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+                <div class="nav-overlay"></div>
                 <nav class="nav">
                     <ul class="nav-links">
                         <li><a href="service.php">Services</a></li>
@@ -66,7 +68,7 @@ if (!$post) {
                     <img src="uploads/<?= htmlspecialchars($post['image']) ?>" alt="<?= htmlspecialchars($post['title']) ?>" style="width: 100%; border-radius: 20px; margin-bottom: 48px;">
                 <?php endif; ?>
                 <div class="post-body" style="font-size: 18px; color: var(--gray-300); line-height: 1.9;">
-                    <?= $post['content'] ?>
+                    <?= strip_tags($post['content'], '<p><br><h1><h2><h3><h4><h5><h6><a><strong><b><em><i><u><ul><ol><li><blockquote><pre><code><img><hr><div><span><table><thead><tbody><tr><th><td>') ?>
                 </div>
                 <div style="margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--gray-700);">
                     <a href="blog.php" style="color: var(--accent); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">← Back to Blog</a>
@@ -94,7 +96,7 @@ if (!$post) {
                 <div class="footer-col"><h4>Industries</h4><ul><li><a href="industry-hvac.php">HVAC</a></li><li><a href="industry-plumbing.php">Plumbing</a></li><li><a href="industry-electrical.php">Electrical</a></li><li><a href="industries.php">View All</a></li></ul></div>
                 <div class="footer-col"><h4>Company</h4><ul><li><a href="about.php">About Us</a></li><li><a href="core.php">Core</a></li><li><a href="blog.php">Blog</a></li><li><a href="contact.php">Contact</a></li><li><a href="quiz.php">Free Quiz</a></li></ul></div>
             </div>
-            <div class="footer-bottom"><p>&copy; 2025 Agile & Co. All rights reserved.</p><div class="footer-legal"><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div></div>
+            <div class="footer-bottom"><p>&copy; <?= date('Y') ?> Agile & Co. All rights reserved.</p><div class="footer-legal"><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div></div>
         </div>
     </footer>
 

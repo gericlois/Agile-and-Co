@@ -1,7 +1,8 @@
 <?php
-session_start();
+session_start(['cookie_httponly' => true, 'cookie_samesite' => 'Strict']);
 require_once '../config/database.php';
 require_once '../config/activity-log.php';
+require_once '../config/csrf.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header('Location: login.php');
@@ -25,6 +26,9 @@ if (isset($_GET['id'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!csrf_verify()) {
+        $error = 'Invalid security token. Please try again.';
+    } else {
     $title = trim($_POST['title'] ?? '');
     $slug = trim($_POST['slug'] ?? '');
     $excerpt = trim($_POST['excerpt'] ?? '');
@@ -49,9 +53,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
-            $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+            $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
             $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-            if (in_array(strtolower($ext), $allowed)) {
+            $maxSize = 5 * 1024 * 1024; // 5MB
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            $fileMime = mime_content_type($_FILES['image']['tmp_name']);
+
+            if (!in_array($ext, $allowed)) {
+                $error = 'Invalid file type. Allowed: JPG, PNG, GIF, WebP.';
+            } elseif ($_FILES['image']['size'] > $maxSize) {
+                $error = 'File too large. Maximum size is 5MB.';
+            } elseif (!in_array($fileMime, $allowedMimes)) {
+                $error = 'File content does not match an allowed image type.';
+            } elseif (!getimagesize($_FILES['image']['tmp_name'])) {
+                $error = 'Uploaded file is not a valid image.';
+            } else {
+                // Delete old image if replacing
+                if (!empty($post['image']) && file_exists($uploadDir . $post['image'])) {
+                    unlink($uploadDir . $post['image']);
+                }
                 $imageName = $slug . '-' . time() . '.' . $ext;
                 move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir . $imageName);
             }
@@ -77,6 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([(int)$postId]);
         $post = $stmt->fetch();
         $isEdit = true;
+    }
     }
 }
 
@@ -178,6 +199,7 @@ $unreadCount = $pdo->query("SELECT COUNT(*) FROM contacts WHERE is_read = 0")->f
             <?php endif; ?>
 
             <form method="POST" enctype="multipart/form-data" class="admin-post-form">
+                <?= csrf_field() ?>
                 <input type="hidden" name="post_id" value="<?= htmlspecialchars($post['id']) ?>">
 
                 <div class="admin-form-grid">

@@ -32,12 +32,14 @@ function esc($content, $section, $key, $default = '') {
         <div class="container">
             <div class="header-inner">
                 <a href="index.php" class="logo">Agile & Co</a>
+                <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+                <div class="nav-overlay"></div>
                 <nav class="nav">
                     <ul class="nav-links">
                         <li><a href="service.php">Services</a></li>
-                        <li><a href="contact.php">Industries</a></li>
-                        <li><a href="contact.php">Core</a></li>
-                        <li><a href="contact.php">About</a></li>
+                        <li><a href="industries.php">Industries</a></li>
+                        <li><a href="core.php">Core</a></li>
+                        <li><a href="about.php">About</a></li>
                     </ul>
                     <a href="contact.php" class="btn btn-primary">Let's Talk Growth</a>
                 </nav>
@@ -344,11 +346,11 @@ function esc($content, $section, $key, $default = '') {
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-brand"><a href="index.php" class="logo" id="footer-logo">Agile & Co</a><p>AI-powered marketing for local service businesses. More leads. More booked jobs. Zero guesswork.</p></div>
-                <div class="footer-col"><h4>Services</h4><ul><li><a href="contact.php">SEO</a></li><li><a href="contact.php">Google Ads</a></li><li><a href="contact.php">Meta Ads</a></li><li><a href="contact.php">Website Design</a></li></ul></div>
-                <div class="footer-col"><h4>Industries</h4><ul><li><a href="contact.php">Home Services</a></li><li><a href="contact.php">Healthcare</a></li><li><a href="contact.php">Automotive</a></li><li><a href="contact.php">View All</a></li></ul></div>
-                <div class="footer-col"><h4>Company</h4><ul><li><a href="contact.php">About Us</a></li><li><a href="contact.php">Core</a></li><li><a href="contact.php">Blog</a></li><li><a href="contact.php">Contact</a></li><li><a href="quiz.php">Free Quiz</a></li></ul></div>
+                <div class="footer-col"><h4>Services</h4><ul><li><a href="services-seo.php">SEO</a></li><li><a href="services-google-ads.php">Google Ads</a></li><li><a href="services-meta-ads.php">Meta Ads</a></li><li><a href="services-web-design.php">Website Design</a></li></ul></div>
+                <div class="footer-col"><h4>Industries</h4><ul><li><a href="industry-hvac.php">Home Services</a></li><li><a href="industry-medspa.php">Healthcare</a></li><li><a href="industry-automotive.php">Automotive</a></li><li><a href="industries.php">View All</a></li></ul></div>
+                <div class="footer-col"><h4>Company</h4><ul><li><a href="about.php">About Us</a></li><li><a href="core.php">Core</a></li><li><a href="blog.php">Blog</a></li><li><a href="contact.php">Contact</a></li><li><a href="quiz.php">Free Quiz</a></li></ul></div>
             </div>
-            <div class="footer-bottom"><p>© 2025 Agile & Co. All rights reserved.</p><div class="footer-legal"><a href="contact.php">Privacy Policy</a><a href="contact.php">Terms of Service</a></div></div>
+            <div class="footer-bottom"><p>&copy; <?= date('Y') ?> Agile & Co. All rights reserved.</p><div class="footer-legal"><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div></div>
         </div>
     </footer>
 

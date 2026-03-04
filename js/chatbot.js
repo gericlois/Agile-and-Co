@@ -222,9 +222,9 @@
 .chatbot-send:disabled { opacity: 0.5; cursor: not-allowed; }
 .chatbot-send svg { width: 18px; height: 18px; fill: #000; }
 @media (max-width: 480px) {
-    .chatbot-window { right: 0; bottom: 0; left: 0; width: 100%; max-height: 100vh; border-radius: 0; }
+    .chatbot-window { right: 0; bottom: 0; left: 0; width: 100%; max-height: 100vh; border-radius: 0; z-index: 1001; }
     .chatbot-messages { max-height: calc(100vh - 160px); }
-    .chatbot-bubble { bottom: 20px; right: 20px; width: 54px; height: 54px; }
+    .chatbot-bubble { bottom: 20px; right: 20px; width: 54px; height: 54px; z-index: 1001; }
 }`;
         document.head.appendChild(style);
     }

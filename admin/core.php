@@ -1,7 +1,8 @@
 <?php
-session_start();
+session_start(['cookie_httponly' => true, 'cookie_samesite' => 'Strict']);
 require_once '../config/database.php';
 require_once '../config/activity-log.php';
+require_once '../config/csrf.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header('Location: login.php');
@@ -34,8 +35,13 @@ foreach ($coreRows as $cp) {
     }
 }
 
+// CSRF verification for all POST handlers
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrf_verify()) {
+    $error = 'Invalid security token. Please try again.';
+}
+
 // Handle add core page
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_core_page') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error && ($_POST['action'] ?? '') === 'add_core_page') {
     $newLabel = trim($_POST['page_name'] ?? '');
     $newSlug = trim($_POST['page_slug'] ?? '');
     $newSlug = preg_replace('/[^a-z0-9\-]/', '', strtolower(str_replace(' ', '-', $newSlug)));
@@ -64,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_c
             $insertStmt->execute([$newSlug . '_hero', 'cta_secondary', 'Back to Core']);
 
             logActivity($pdo, 'create', 'core_page', 'Added core page: ' . $newLabel);
-            $success = 'Core page "' . htmlspecialchars($newLabel) . '" added successfully.';
+            $success = 'Core page "' . $newLabel . '" added successfully.';
 
             // Reload
             $coreRows = $pdo->query("SELECT * FROM core_pages ORDER BY sort_order, id")->fetchAll();
@@ -89,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_c
 }
 
 // Handle delete core page
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_core_page') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error && ($_POST['action'] ?? '') === 'delete_core_page') {
     $deleteSlug = trim($_POST['slug'] ?? '');
     if (!empty($deleteSlug) && !in_array($deleteSlug, $customSlugs)) {
         try {
@@ -142,7 +148,7 @@ if (!in_array($currentPage, $validPages)) {
 $isCustom = in_array($currentPage, $customSlugs);
 
 // Handle content form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_content') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error && ($_POST['action'] ?? '') === 'save_content') {
     try {
         $stmt = $pdo->prepare(
             "INSERT INTO site_content (section, field_key, field_value)
@@ -445,6 +451,7 @@ if ($isCustom && isset($customPageSections[$currentPage])) {
             <div id="addCoreForm" style="display: none; background: var(--gray-800); border: 1px solid var(--gray-700); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
                 <h3 style="margin-bottom: 16px; font-size: 18px;">Add New Core Page</h3>
                 <form method="POST" action="core.php">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="add_core_page">
                     <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 16px; align-items: end;">
                         <div class="form-group" style="margin-bottom: 0;">
@@ -477,6 +484,7 @@ if ($isCustom && isset($customPageSections[$currentPage])) {
             <?php if (!$isCustom): ?>
             <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
                 <form method="POST" action="core.php" onsubmit="return confirm('Are you sure you want to delete the &quot;<?= htmlspecialchars($pageLabels[$currentPage]) ?>&quot; page? This will remove all its content and cannot be undone.')">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="delete_core_page">
                     <input type="hidden" name="slug" value="<?= htmlspecialchars($currentPage) ?>">
                     <button type="submit" class="btn btn-secondary" style="padding: 8px 16px; font-size: 13px; color: #ff6b6b; border-color: rgba(255, 107, 107, 0.3);">Delete This Page</button>
@@ -485,6 +493,7 @@ if ($isCustom && isset($customPageSections[$currentPage])) {
             <?php endif; ?>
 
             <form method="POST" action="core.php?page=<?= $currentPage ?>">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="save_content">
                 <?php foreach ($sections as $sectionKey => $sectionData): ?>
                     <div class="admin-accordion-item">

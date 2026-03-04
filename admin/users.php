@@ -1,7 +1,8 @@
 <?php
-session_start();
+session_start(['cookie_httponly' => true, 'cookie_samesite' => 'Strict']);
 require_once '../config/database.php';
 require_once '../config/activity-log.php';
+require_once '../config/csrf.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header('Location: login.php');
@@ -12,8 +13,13 @@ $error = '';
 $success = '';
 $currentAdminId = (int)$_SESSION['admin_id'];
 
+// CSRF verification for all POST handlers
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrf_verify()) {
+    $error = 'Invalid security token. Please try again.';
+}
+
 // Add new admin
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error && isset($_POST['action'])) {
     if ($_POST['action'] === 'add_user') {
         $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
@@ -71,6 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
 // Delete admin
 if (isset($_GET['delete'])) {
+    if (!csrf_verify()) { header('Location: users.php'); exit; }
     $deleteId = (int)$_GET['delete'];
     $totalAdmins = $pdo->query("SELECT COUNT(*) FROM admins")->fetchColumn();
 
@@ -184,7 +191,7 @@ $unreadCount = $pdo->query("SELECT COUNT(*) FROM contacts WHERE is_read = 0")->f
                 <div style="background: rgba(255, 107, 107, 0.1); border: 1px solid rgba(255, 107, 107, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 24px; color: #ff6b6b; font-size: 14px;"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
             <?php if ($success): ?>
-                <div style="background: rgba(76, 201, 240, 0.1); border: 1px solid rgba(76, 201, 240, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 24px; color: var(--accent); font-size: 14px;"><?= $success ?></div>
+                <div style="background: rgba(76, 201, 240, 0.1); border: 1px solid rgba(76, 201, 240, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 24px; color: var(--accent); font-size: 14px;"><?= htmlspecialchars($success) ?></div>
             <?php endif; ?>
 
             <div class="admin-stats" style="grid-template-columns: repeat(2, 1fr);">
@@ -220,13 +227,14 @@ $unreadCount = $pdo->query("SELECT COUNT(*) FROM contacts WHERE is_read = 0")->f
                                 <td class="admin-actions">
                                     <button type="button" class="btn-small" onclick="togglePasswordForm(<?= $admin['id'] ?>)">Change Password</button>
                                     <?php if ($admin['id'] !== $currentAdminId && $totalAdmins > 1): ?>
-                                        <a href="users.php?delete=<?= $admin['id'] ?>" class="btn-small btn-danger" onclick="return confirm('Delete admin &quot;<?= htmlspecialchars($admin['username']) ?>&quot;? This cannot be undone.')">Delete</a>
+                                        <a href="users.php?delete=<?= $admin['id'] ?>&csrf_token=<?= csrf_token() ?>" class="btn-small btn-danger" onclick="return confirm('Delete admin &quot;<?= htmlspecialchars($admin['username']) ?>&quot;? This cannot be undone.')">Delete</a>
                                     <?php endif; ?>
                                 </td>
                             </tr>
                             <tr id="pw-form-<?= $admin['id'] ?>" style="display: none;">
                                 <td colspan="3" style="padding: 16px 24px; background: var(--gray-900);">
                                     <form method="POST" style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+                                        <?= csrf_field() ?>
                                         <input type="hidden" name="action" value="change_password">
                                         <input type="hidden" name="user_id" value="<?= $admin['id'] ?>">
                                         <div>
@@ -253,6 +261,7 @@ $unreadCount = $pdo->query("SELECT COUNT(*) FROM contacts WHERE is_read = 0")->f
                     <h2>Add New Admin</h2>
                 </div>
                 <form method="POST" style="padding: 24px;">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="add_user">
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; align-items: end;">
                         <div>

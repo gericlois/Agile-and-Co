@@ -1,7 +1,8 @@
 <?php
-session_start();
+session_start(['cookie_httponly' => true, 'cookie_samesite' => 'Strict']);
 require_once '../config/database.php';
 require_once '../config/activity-log.php';
+require_once '../config/csrf.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header('Location: login.php');
@@ -12,8 +13,13 @@ $defaults = require '../config/contact-defaults.php';
 $success = '';
 $error = '';
 
+// CSRF verification for all POST handlers
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrf_verify()) {
+    $error = 'Invalid security token. Please try again.';
+}
+
 // Handle field actions
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error) {
     $action = $_POST['action'] ?? 'save_content';
 
     if ($action === 'add_field') {
@@ -274,6 +280,7 @@ $sections = [
 
             <!-- Page Content Sections (Hero, Info, Success) -->
             <form method="POST">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="save_content">
                 <?php foreach ($sections as $sectionKey => $sectionData): ?>
                     <div class="admin-accordion-item">
@@ -316,6 +323,7 @@ $sections = [
                 <!-- Add Field Form -->
                 <div id="addFieldForm" class="add-field-form">
                     <form method="POST">
+                        <?= csrf_field() ?>
                         <input type="hidden" name="action" value="add_field">
                         <div class="add-field-grid">
                             <div class="form-group">
@@ -361,6 +369,7 @@ $sections = [
 
                 <!-- Field List (Editable) -->
                 <form method="POST">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="update_fields">
                     <div class="field-manager-list">
                         <?php foreach ($formFields as $f): ?>
@@ -447,10 +456,12 @@ $sections = [
                 <?php foreach ($formFields as $f): ?>
                     <?php if (!$f['is_core']): ?>
                     <form id="toggle-<?= $f['id'] ?>" method="POST" style="display:none;">
+                        <?= csrf_field() ?>
                         <input type="hidden" name="action" value="toggle_field">
                         <input type="hidden" name="field_id" value="<?= $f['id'] ?>">
                     </form>
                     <form id="delete-<?= $f['id'] ?>" method="POST" style="display:none;">
+                        <?= csrf_field() ?>
                         <input type="hidden" name="action" value="delete_field">
                         <input type="hidden" name="field_id" value="<?= $f['id'] ?>">
                     </form>

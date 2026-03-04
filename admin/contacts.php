@@ -1,7 +1,8 @@
 <?php
-session_start();
+session_start(['cookie_httponly' => true, 'cookie_samesite' => 'Strict']);
 require_once '../config/database.php';
 require_once '../config/activity-log.php';
+require_once '../config/csrf.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header('Location: login.php');
@@ -13,6 +14,9 @@ $error = '';
 
 // Send reply
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'reply') {
+    if (!csrf_verify()) {
+        $error = 'Invalid security token. Please try again.';
+    } else {
     $contactId = (int)($_POST['contact_id'] ?? 0);
     $replyTo = trim($_POST['reply_to'] ?? '');
     $replySubject = trim($_POST['reply_subject'] ?? '');
@@ -26,8 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $adminEmail = $pdo->query("SELECT email FROM notification_emails WHERE is_active = 1 LIMIT 1")->fetchColumn() ?: $adminEmail;
         } catch (Exception $e) {}
 
-        $headers = "From: Agile & Co <" . $adminEmail . ">\r\n";
-        $headers .= "Reply-To: " . $adminEmail . "\r\n";
+        $safeAdminEmail = filter_var($adminEmail, FILTER_SANITIZE_EMAIL);
+        $headers = "From: Agile & Co <" . $safeAdminEmail . ">\r\n";
+        $headers .= "Reply-To: " . $safeAdminEmail . "\r\n";
         $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 
         $sent = @mail($replyTo, $replySubject, $replyBody, $headers);
@@ -35,10 +40,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         logActivity($pdo, 'reply', 'contact', 'Replied to: ' . $replyTo);
         $success = $sent ? 'Reply sent to ' . htmlspecialchars($replyTo) : 'Reply queued (check mail config if not delivered).';
     }
+    }
 }
 
 // Mark as read
 if (isset($_GET['read'])) {
+    if (!csrf_verify()) { header('Location: contacts.php'); exit; }
     $id = (int)$_GET['read'];
     $stmt = $pdo->prepare("SELECT CONCAT(first_name, ' ', last_name) FROM contacts WHERE id = ?");
     $stmt->execute([$id]);
@@ -51,6 +58,7 @@ if (isset($_GET['read'])) {
 
 // Delete
 if (isset($_GET['delete'])) {
+    if (!csrf_verify()) { header('Location: contacts.php'); exit; }
     $id = (int)$_GET['delete'];
     $stmt = $pdo->prepare("SELECT CONCAT(first_name, ' ', last_name) FROM contacts WHERE id = ?");
     $stmt->execute([$id]);
@@ -206,12 +214,12 @@ function buildUrl($overrides = []) {
                     <p><?= htmlspecialchars($viewContact['email']) ?> &middot; <?= date('M j, Y g:i A', strtotime($viewContact['created_at'])) ?></p>
                 </div>
                 <div style="display: flex; gap: 8px;">
-                    <a href="contacts.php?delete=<?= $viewContact['id'] ?>" class="btn btn-secondary" style="padding: 8px 16px; font-size: 13px; color: #ff6b6b; border-color: rgba(255,107,107,0.3);" onclick="return confirm('Delete this contact?')">Delete</a>
+                    <a href="contacts.php?delete=<?= $viewContact['id'] ?>&csrf_token=<?= csrf_token() ?>" class="btn btn-secondary" style="padding: 8px 16px; font-size: 13px; color: #ff6b6b; border-color: rgba(255,107,107,0.3);" onclick="return confirm('Delete this contact?')">Delete</a>
                 </div>
             </div>
 
             <?php if ($success): ?>
-                <div style="background: rgba(76, 201, 240, 0.1); border: 1px solid rgba(76, 201, 240, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 24px; color: var(--accent); font-size: 14px;"><?= $success ?></div>
+                <div style="background: rgba(76, 201, 240, 0.1); border: 1px solid rgba(76, 201, 240, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 24px; color: var(--accent); font-size: 14px;"><?= htmlspecialchars($success) ?></div>
             <?php endif; ?>
             <?php if ($error): ?>
                 <div style="background: rgba(255, 107, 107, 0.1); border: 1px solid rgba(255, 107, 107, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 24px; color: #ff6b6b; font-size: 14px;"><?= htmlspecialchars($error) ?></div>
@@ -302,6 +310,7 @@ function buildUrl($overrides = []) {
             <div class="admin-section">
                 <div class="admin-section-header"><h2>Reply</h2></div>
                 <form method="POST" action="contacts.php?view=<?= $viewContact['id'] ?>" style="padding: 24px;">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="reply">
                     <input type="hidden" name="contact_id" value="<?= $viewContact['id'] ?>">
                     <div style="margin-bottom: 16px;">
@@ -420,7 +429,7 @@ Agile & Co Team</textarea>
                                     </td>
                                     <td style="text-align: right;" class="admin-actions">
                                         <a href="contacts.php?view=<?= $c['id'] ?><?= $search ? '&q=' . urlencode($search) : '' ?><?= $sort !== 'newest' ? '&sort=' . $sort : '' ?><?= $scoreFilter ? '&score=' . urlencode($scoreFilter) : '' ?><?= $page > 1 ? '&page=' . $page : '' ?>" class="btn-small" style="background: var(--accent); color: #000;">View</a>
-                                        <a href="contacts.php?delete=<?= $c['id'] ?>" class="btn-small btn-danger" onclick="return confirm('Delete this contact?')">Delete</a>
+                                        <a href="contacts.php?delete=<?= $c['id'] ?>&csrf_token=<?= csrf_token() ?>" class="btn-small btn-danger" onclick="return confirm('Delete this contact?')">Delete</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

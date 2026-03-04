@@ -1,7 +1,8 @@
 <?php
-session_start();
+session_start(['cookie_httponly' => true, 'cookie_samesite' => 'Strict']);
 require_once '../config/database.php';
 require_once '../config/activity-log.php';
+require_once '../config/csrf.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header('Location: login.php');
@@ -18,6 +19,7 @@ $latestAction = $pdo->query("SELECT created_at FROM activity_log ORDER BY create
 
 // Handle clear history
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clear_history'])) {
+    if (!csrf_verify()) { header('Location: history.php'); exit; }
     $pdo->exec("DELETE FROM activity_log");
     logActivity($pdo, 'clear', 'history', 'Cleared all activity history');
     header('Location: history.php');
@@ -197,6 +199,7 @@ function actionColor($action) {
                     <div style="display: flex; gap: 8px; align-items: center;">
                         <?php if ($totalActivities > 0): ?>
                         <form method="POST" onsubmit="return confirm('Are you sure you want to clear all activity history? This cannot be undone.');" style="margin: 0;">
+                            <?= csrf_field() ?>
                             <button type="submit" name="clear_history" class="btn-small btn-danger" style="cursor: pointer; border: 1px solid rgba(255,107,107,0.3);">Clear All</button>
                         </form>
                         <?php endif; ?>

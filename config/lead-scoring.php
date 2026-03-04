@@ -80,7 +80,8 @@ The reason should be concise and professional, suitable for display to a sales t
         CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
         CURLOPT_POSTFIELDS => json_encode($payload),
         CURLOPT_TIMEOUT => 30,
-        CURLOPT_SSL_VERIFYPEER => false
+        CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_CAINFO => 'C:/xampp/apache/bin/curl-ca-bundle.crt'
     ]);
 
     $response = curl_exec($ch);
@@ -89,13 +90,14 @@ The reason should be concise and professional, suitable for display to a sales t
     curl_close($ch);
 
     if ($curlError) {
-        return ['score' => null, 'reason' => null, 'error' => 'Curl error: ' . $curlError];
+        error_log('Lead scoring curl error: ' . $curlError);
+        return ['score' => null, 'reason' => null, 'error' => 'Connection error during lead scoring.'];
     }
 
     if ($httpCode !== 200) {
         $errorData = json_decode($response, true);
-        $errorMsg = $errorData['error']['message'] ?? 'HTTP ' . $httpCode;
-        return ['score' => null, 'reason' => null, 'error' => 'API error: ' . $errorMsg];
+        error_log('Lead scoring API error: ' . ($errorData['error']['message'] ?? 'HTTP ' . $httpCode));
+        return ['score' => null, 'reason' => null, 'error' => 'Lead scoring service temporarily unavailable.'];
     }
 
     $data = json_decode($response, true);

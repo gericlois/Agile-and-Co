@@ -1,7 +1,8 @@
 <?php
-session_start();
+session_start(['cookie_httponly' => true, 'cookie_samesite' => 'Strict']);
 require_once '../config/database.php';
 require_once '../config/activity-log.php';
+require_once '../config/csrf.php';
 
 if (!isset($_SESSION['admin_id'])) {
     header('Location: login.php');
@@ -39,8 +40,13 @@ foreach ($serviceRows as $svc) {
     }
 }
 
+// CSRF verification for all POST handlers
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrf_verify()) {
+    $error = 'Invalid security token. Please try again.';
+}
+
 // Handle add service
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_service') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error && ($_POST['action'] ?? '') === 'add_service') {
     $newLabel = trim($_POST['service_name'] ?? '');
     $newSlug = trim($_POST['service_slug'] ?? '');
     $newSlug = preg_replace('/[^a-z0-9\-]/', '', strtolower(str_replace(' ', '-', $newSlug)));
@@ -69,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_s
             $insertStmt->execute([$newSlug . '_hero', 'cta_secondary', 'Learn About Core']);
 
             logActivity($pdo, 'create', 'service', 'Added service: ' . $newLabel);
-            $success = 'Service "' . htmlspecialchars($newLabel) . '" added successfully.';
+            $success = 'Service "' . $newLabel . '" added successfully.';
 
             // Reload services
             $serviceRows = $pdo->query("SELECT * FROM services ORDER BY sort_order, id")->fetchAll();
@@ -96,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_s
 }
 
 // Handle delete service
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_service') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error && ($_POST['action'] ?? '') === 'delete_service') {
     $deleteSlug = trim($_POST['slug'] ?? '');
     if (!empty($deleteSlug) && !in_array($deleteSlug, $customSlugs)) {
         try {
@@ -122,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
 }
 
 // Handle toggle service visibility
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toggle_service') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error && ($_POST['action'] ?? '') === 'toggle_service') {
     $toggleSlug = trim($_POST['slug'] ?? '');
     if (!empty($toggleSlug)) {
         $pdo->prepare("UPDATE services SET is_active = 1 - is_active WHERE slug = ?")->execute([$toggleSlug]);
@@ -163,7 +169,7 @@ if (!in_array($currentPage, $validPages)) {
 $isCustom = in_array($currentPage, $customSlugs);
 
 // Handle content form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_content') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$error && ($_POST['action'] ?? '') === 'save_content') {
     try {
         $stmt = $pdo->prepare(
             "INSERT INTO site_content (section, field_key, field_value)
@@ -717,6 +723,7 @@ if ($isCustom && isset($customPageSections[$currentPage])) {
             <div id="addServiceForm" style="display: none; background: var(--gray-800); border: 1px solid var(--gray-700); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
                 <h3 style="margin-bottom: 16px; font-size: 18px;">Add New Service</h3>
                 <form method="POST" action="services.php">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="add_service">
                     <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 16px; align-items: end;">
                         <div class="form-group" style="margin-bottom: 0;">
@@ -749,6 +756,7 @@ if ($isCustom && isset($customPageSections[$currentPage])) {
             <?php if (!$isCustom): ?>
             <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
                 <form method="POST" action="services.php" onsubmit="return confirm('Are you sure you want to delete the &quot;<?= htmlspecialchars($pageLabels[$currentPage]) ?>&quot; service? This will remove all its content and cannot be undone.')">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="action" value="delete_service">
                     <input type="hidden" name="slug" value="<?= htmlspecialchars($currentPage) ?>">
                     <button type="submit" class="btn btn-secondary" style="padding: 8px 16px; font-size: 13px; color: #ff6b6b; border-color: rgba(255, 107, 107, 0.3);">Delete This Service</button>
@@ -757,6 +765,7 @@ if ($isCustom && isset($customPageSections[$currentPage])) {
             <?php endif; ?>
 
             <form method="POST" action="services.php?page=<?= $currentPage ?>">
+                <?= csrf_field() ?>
                 <input type="hidden" name="action" value="save_content">
                 <?php foreach ($sections as $sectionKey => $sectionData): ?>
                     <div class="admin-accordion-item">
